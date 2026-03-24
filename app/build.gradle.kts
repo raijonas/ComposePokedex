@@ -80,9 +80,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
 
     //Coil
-    implementation("io.coil-kt.coil3:coil-compose:3.4.0")
-    implementation("com.google.accompanist:accompanist-coil:0.15.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.4.0")
+    implementation(libs.coil.compose)
+    implementation(libs.accompanist.coil)
+    implementation(libs.coil.network.okhttp)
 
     //Hilt
     implementation(libs.dagger.hilt)
