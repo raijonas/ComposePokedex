@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.toArgb
@@ -59,7 +60,7 @@ fun PokemonList(
             pokemonList.size / 2 + 1
         }
         items(itemCount) {
-            if (it >= itemCount - 1) {
+            if (it >= itemCount - 1 && !endReached && !isLoading) {
                 viewModel.loadPokemonPaginated()
             }
             PokedexRow(it, pokemonList, navController)
@@ -90,6 +91,7 @@ fun PokedexEntry(
 ) {
     val defaultDominantColor = MaterialTheme.colorScheme.surface
     var dominantColor by remember { mutableStateOf(defaultDominantColor) }
+    var isLoading by remember { mutableStateOf(true) }
     val context = LocalContext.current
 
     Box(
@@ -116,6 +118,7 @@ fun PokedexEntry(
             AsyncImage(
                 model = entry.imageUrl,
                 onSuccess = { success ->
+                    isLoading = false
                     val bitmap = success.result.image.toBitmap()
 
                     bitmap.let {
@@ -131,6 +134,12 @@ fun PokedexEntry(
                     .size(120.dp)
                     .align(CenterHorizontally)
             )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.scale(0.5f)
+                )
+            }
             Text(
                 text = entry.pokemonName,
                 fontFamily = RobotoCondensed,

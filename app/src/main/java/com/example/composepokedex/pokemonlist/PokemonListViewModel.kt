@@ -34,6 +34,7 @@ class PokemonListViewModel @Inject constructor(
 
     fun loadPokemonPaginated() {
         viewModelScope.launch {
+            isLoading.value = true
             val result = repository.getPokemonList(PAGE_SIZE, curPage * PAGE_SIZE)
             when (result) {
                 is Resource.Success -> {
@@ -50,7 +51,7 @@ class PokemonListViewModel @Inject constructor(
                             , url, number.toInt()
                         )
                     }
-                    curPage ++
+                    curPage++
                     loadError.value = ""
                     isLoading.value = false
                     pokemonList.value += pokedexEntries
@@ -76,5 +77,4 @@ class PokemonListViewModel @Inject constructor(
             }
         }
     }
-
 }
