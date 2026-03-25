@@ -14,6 +14,7 @@ import com.example.composepokedex.util.Constants.PAGE_SIZE
 import com.example.composepokedex.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -28,8 +29,41 @@ class PokemonListViewModel @Inject constructor(
     var isLoading = mutableStateOf(false)
     var endReached = mutableStateOf(false)
 
+    //searchBar
+
+    private var cachedPokemonList = listOf<PokedexListEntry>()
+    private var isSearchStarting = true
+    var isSearching = mutableStateOf(false)
+
+    //chama a lista assim que abre a activity
     init {
         loadPokemonPaginated()
+    }
+
+    fun searchPokemonList(query: String) {
+        val listToSearch = if(isSearchStarting) {
+            pokemonList.value
+        } else {
+            cachedPokemonList
+        }
+        viewModelScope.launch(Dispatchers.Default) {
+            if(query.isEmpty()) {
+                pokemonList.value = cachedPokemonList
+                isSearching.value = false
+                isSearchStarting = true
+                return@launch
+            }
+            val results = listToSearch.filter {
+                it.pokemonName.contains(query.trim(), ignoreCase = true) ||
+                        it.number.toString() == query.trim()
+            }
+            if(isSearchStarting) {
+                cachedPokemonList = pokemonList.value
+                isSearchStarting = false
+            }
+            pokemonList.value = results
+            isSearching.value = true
+        }
     }
 
     fun loadPokemonPaginated() {
@@ -45,10 +79,12 @@ class PokemonListViewModel @Inject constructor(
                         } else {
                             entry.url.takeLastWhile { it.isDigit() }
                         }
-                        val url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${number}.png"
+                        val url =
+                            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${number}.png"
                         PokedexListEntry(
-                            entry.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-                            , url, number.toInt()
+                            entry.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() },
+                            url,
+                            number.toInt()
                         )
                     }
                     curPage++
