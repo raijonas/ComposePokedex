@@ -34,6 +34,7 @@ class PokemonListViewModel @Inject constructor(
     private var cachedPokemonList = listOf<PokedexListEntry>()
     private var isSearchStarting = true
     var isSearching = mutableStateOf(false)
+    var searchQuery = mutableStateOf("")
 
     //chama a lista assim que abre a activity
     init {
@@ -41,6 +42,8 @@ class PokemonListViewModel @Inject constructor(
     }
 
     fun searchPokemonList(query: String) {
+        searchQuery.value = query
+
         val listToSearch = if(isSearchStarting) {
             pokemonList.value
         } else {
@@ -97,6 +100,8 @@ class PokemonListViewModel @Inject constructor(
                     loadError.value = result.message!!
                     isLoading.value = false
                 }
+
+                is Resource.Loading -> TODO()
             }
         }
     }

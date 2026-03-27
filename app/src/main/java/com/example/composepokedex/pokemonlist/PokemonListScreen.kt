@@ -23,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -53,13 +52,15 @@ fun PokemonListScreen(
                     .align(CenterHorizontally)
             )
             SearchBar(
+                text = viewModel.searchQuery.value,
+                onTextChange = {
+                    viewModel.searchPokemonList(it)
+                },
                 hint = "Search...",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-            ) {
-                viewModel.searchPokemonList(it)
-            }
+            )
             Spacer(modifier = Modifier.height(16.dp))
             PokemonList(navController)
         }
@@ -68,19 +69,18 @@ fun PokemonListScreen(
 
 @Composable
 fun SearchBar(
+    text: String,
+    onTextChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     hint: String = "",
-    onSearch: (String) -> Unit = {}
 ) {
-    var text by remember { mutableStateOf("") }
     var isHintDisplayed by remember { mutableStateOf(hint != "") }
 
     Box(modifier = modifier) {
         BasicTextField(
             value = text,
             onValueChange = {
-                text = it
-                onSearch(it)
+                onTextChange(it)
             },
             maxLines = 1,
             singleLine = true,
@@ -91,7 +91,7 @@ fun SearchBar(
                 .background(Color.White, CircleShape)
                 .padding(horizontal = 20.dp, vertical = 12.dp)
                 .onFocusChanged {
-                    isHintDisplayed = !it.isFocused && text.isNotEmpty()
+                    isHintDisplayed = !it.isFocused && text.isEmpty()
                 }
         )
         if (isHintDisplayed) {
